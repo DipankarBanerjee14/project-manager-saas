@@ -1,25 +1,17 @@
 // src/app/api/projects/[id]/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
 
-// Corrected: avoid direct destructuring of `params` in function arguments
-type Context = {
-  params: {
-    id: string;
-  };
-};
-
-export async function PUT(req: Request, context: Context) {
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   const { id } = context.params;
+  const { name } = await req.json();
 
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
-
-  const { name } = await req.json();
 
   const project = await prisma.project.update({
     where: { id },
@@ -29,7 +21,7 @@ export async function PUT(req: Request, context: Context) {
   return NextResponse.json(project);
 }
 
-export async function DELETE(_: Request, context: Context) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   const { id } = context.params;
 
@@ -38,6 +30,5 @@ export async function DELETE(_: Request, context: Context) {
   }
 
   await prisma.project.delete({ where: { id } });
-
   return NextResponse.json({ success: true });
 }
