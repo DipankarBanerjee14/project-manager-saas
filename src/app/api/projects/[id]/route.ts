@@ -1,10 +1,18 @@
 // src/app/api/projects/[id]/route.ts
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import type { NextRequest } from 'next/server';
 
-export async function PUT(req: NextRequest, context: { params: { id: string } }) {
+// For TypeScript — correct type of the second argument in App Router
+type Context = {
+  params: {
+    id: string;
+  };
+};
+
+export async function PUT(req: NextRequest, context: Context) {
   const session = await getServerSession(authOptions);
   const { id } = context.params;
   const { name } = await req.json();
@@ -21,7 +29,7 @@ export async function PUT(req: NextRequest, context: { params: { id: string } })
   return NextResponse.json(project);
 }
 
-export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: Context) {
   const session = await getServerSession(authOptions);
   const { id } = context.params;
 
