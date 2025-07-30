@@ -1,20 +1,11 @@
-// src/app/api/projects/[id]/route.ts
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/pages/api/auth/[...nextauth]';
-import type { NextRequest } from 'next/server';
+import prisma from '@/lib/prisma';
 
-// For TypeScript — correct type of the second argument in App Router
-type Context = {
-  params: {
-    id: string;
-  };
-};
-
-export async function PUT(req: NextRequest, context: Context) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  const { id } = context.params;
+  const { id } = params;
   const { name } = await req.json();
 
   if (!session?.user) {
@@ -29,14 +20,15 @@ export async function PUT(req: NextRequest, context: Context) {
   return NextResponse.json(project);
 }
 
-export async function DELETE(req: NextRequest, context: Context) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
-  const { id } = context.params;
+  const { id } = params;
 
   if (!session?.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   await prisma.project.delete({ where: { id } });
+
   return NextResponse.json({ success: true });
 }
